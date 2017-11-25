@@ -1,0 +1,15 @@
+{
+  "name": "zoetrope",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:hectorromo/zoetrope.git",
+  "author": "Hector Romo <info@hectorromo.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "gulp-concat": "^2.6.1"
+  }
+}
