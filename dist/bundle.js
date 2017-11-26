@@ -1,38 +1,54 @@
-'use strict';var _createClass = function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};}();function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}var Zoetrope = function () {
-	function Zoetrope() {_classCallCheck(this, Zoetrope);
-		this.el = document.createElement('div'),
-		this.el.className = 'zoetrope',
-		this.container = $('.container'),
-		this.tileHeight = 180,
-		this.fullRotation = 360,
-		this.rotationStep = this.fullRotation / this.tilesNum,
+'use strict';var _createClass = function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};}();function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}var $ = function $(selector) {return document.querySelector(selector);};
+var $$ = function $$(selector) {return document.querySelectorAll(selector);};var
+
+Zoetrope = function () {
+	function Zoetrope(container) {_classCallCheck(this, Zoetrope);
+		this.container = $(container);
+		this.tileHeight = 180;
+		this.fullRotation = 360;
+		this.rotationStep = this.fullRotation / this.tilesNum;
 		// this.zDepth = Helpers.getZDepth(this.tileHeight, this.tilesNum),
 		// this.tileZOrigin = Helpers.getZOrigin(this.rotationStep),
 		// this.dynamicPerspective = Helpers.getPerspective(this.rotationStep, this.fullRotation),
-		this.tileArray = [],
-		this.nullObject = document.createElement('div'),
-		this.nullObject.className = 'null-object',
-		this.slotDraggable = null,
+
+		this.tileArray = [];
+		this.slotDraggable = null;
 		this.triggerState = true;
-
-		TweenLite.set(this.nullObject, {
-			position: 'absolute',
-			x: 0 });
-
-
-		$('body').appendChild(this.nullObject);
-
-		this.createTiles();
-		this.setDraggable();
-		this.listen();
-	}_createClass(Zoetrope, [{ key: 'listen', value: function listen()
+	}_createClass(Zoetrope, [{ key: 'init', value: function init()
 
 		{
-			// $('#slot-trigger').addEventListener('click', this.handleClick);
-			// EVT.on('modalClose', Slot.enable);
-			// EVT.on('slotComplete', Slot.disable);
-		} }, { key: 'createTiles', value: function createTiles()
+			console.log('zoetrope:init');
+			this.setupHTML();
+			this.setupNullObj();
+			this.createTiles();
+			this.setDraggable();
 
+			// this.listen();
+		} }, { key: 'setupHTML', value: function setupHTML()
+
+		{
+			this.el = document.createElement('div');
+			this.el.className = 'zoetrope';
+		} }, { key: 'setupNullObj', value: function setupNullObj()
+
+		{
+			this.nullObject = document.createElement('div');
+			this.nullObject.className = 'null-object';
+			$('body').appendChild(this.nullObject);
+
+			TweenLite.set(this.nullObject, {
+				position: 'absolute',
+				x: 0 });
+
+		}
+
+		// listen() {
+		// console.log('zoetrope:listening');
+		// $('#slot-trigger').addEventListener('click', this.handleClick);
+		// EVT.on('modalClose', Slot.enable);
+		// EVT.on('slotComplete', Slot.disable);
+		// }
+	}, { key: 'createTiles', value: function createTiles()
 		{
 			for (var i = 0; i < 10; i++) {
 				var tile = document.createElement('li');
@@ -142,8 +158,6 @@
 			this.triggerState = true;
 			this.slotDraggable[0].enable();
 		} }]);return Zoetrope;}();
-"use strict"; // console.log('main file')
-var $ = function $(element) {return document.querySelector(element);};
-var $$ = function $$(elements) {return document.querySelectorAll(elements);};
+'use strict';var zoetrope = new Zoetrope('.container');
 
-var zoetrope = new Zoetrope();
+zoetrope.init();

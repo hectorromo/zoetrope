@@ -1,37 +1,53 @@
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
 class Zoetrope {
-	constructor() {
-		this.el = document.createElement('div'),
-		this.el.className = 'zoetrope',
-		this.container = $('.container'),
-		this.tileHeight = 180,
-		this.fullRotation = 360,
-		this.rotationStep = this.fullRotation / this.tilesNum,
+	constructor(container) {
+		this.container = $(container);
+		this.tileHeight = 180;
+		this.fullRotation = 360;
+		this.rotationStep = this.fullRotation / this.tilesNum;
 		// this.zDepth = Helpers.getZDepth(this.tileHeight, this.tilesNum),
 		// this.tileZOrigin = Helpers.getZOrigin(this.rotationStep),
 		// this.dynamicPerspective = Helpers.getPerspective(this.rotationStep, this.fullRotation),
-		this.tileArray = [],
-		this.nullObject = document.createElement('div'),
-		this.nullObject.className = 'null-object',
-		this.slotDraggable = null,
+
+		this.tileArray = [];
+		this.slotDraggable = null;
 		this.triggerState = true;
+	}
+
+	init() {
+		console.log('zoetrope:init');
+		this.setupHTML();
+		this.setupNullObj();
+		this.createTiles();
+		this.setDraggable();
+
+		// this.listen();
+	}
+
+	setupHTML() {
+		this.el = document.createElement('div');
+		this.el.className = 'zoetrope';
+	}
+
+	setupNullObj() {
+		this.nullObject = document.createElement('div');
+		this.nullObject.className = 'null-object';
+		$('body').appendChild(this.nullObject);
 
 		TweenLite.set(this.nullObject, {
 			position: 'absolute',
 			x: 0
 		});
-
-		$('body').appendChild(this.nullObject);
-
-		this.createTiles();
-		this.setDraggable();
-		this.listen();
 	}
 
-	listen() {
+	// listen() {
+        // console.log('zoetrope:listening');
 		// $('#slot-trigger').addEventListener('click', this.handleClick);
 		// EVT.on('modalClose', Slot.enable);
 		// EVT.on('slotComplete', Slot.disable);
-	}
+	// }
 	
 	createTiles() {
 		for (let i = 0; i < 10; i++) {
@@ -143,5 +159,3 @@ class Zoetrope {
 		this.slotDraggable[0].enable();
 	}
 }
-
-
