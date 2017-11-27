@@ -4,7 +4,8 @@ const $$ = (selector) => document.querySelectorAll(selector);
 class Sound {
 	constructor() {
 		this.file = new Howl({
-	      src: ['./sounds/r.mp3'],
+	      src: ['./sounds/s.mp3'],
+	      // src: ['./sounds/r.mp3'],
 	      loop: true
 	    });
 	}
@@ -19,7 +20,7 @@ class Zoetrope {
 		this.slotDraggable = null;
 		this.triggerState = true;
 		this.tilesNum = 18;
-		this.tileMargin = 0;
+		this.tileMargin = 75;
 	}
 
 	init() {
@@ -34,7 +35,7 @@ class Zoetrope {
 		this.setupNullObj();
 		this.createTiles();
 		this.setDraggable();
-		// this.listen();
+		this.listen();
 	}
 
 	setupAudio() {
@@ -64,12 +65,19 @@ class Zoetrope {
 		});
 	}
 
-	// listen() {
-        // console.log('zoetrope:listening');
+	listen() {
+		console.log('listening');
+		let self = this;
+		$$('.controls button').forEach(() => {
+			addEventListener('click', (e) => {
+				self.handleClick(e, self);
+			});
+		})
+  //       console.log('zoetrope:listening');
 		// $('#slot-trigger').addEventListener('click', this.handleClick);
 		// EVT.on('modalClose', Slot.enable);
 		// EVT.on('slotComplete', Slot.disable);
-	// }
+	}
 	
 	createTiles() {
 		const self = this;
@@ -78,7 +86,6 @@ class Zoetrope {
 			let fileNumber = (i < 10) ? '0' + i : i;
 			let itemBack = document.createElement('div');
 
-			console.log(fileNumber);
 			itemBack.className = "item-back";
 			itemBack.style.backgroundImage = 'url(./images/file00' + fileNumber + '.jpg)';
 			// '<div class="item-back"></div>';
@@ -113,84 +120,76 @@ class Zoetrope {
 			type: 'x',
 			lockAxis: true,
 			trigger: this.container,
-			dragResistance: 0.5,
-			throwResistance: 1200,
-			minDuration: 4,
+			dragResistance: 0.1,
+			throwResistance: 10,
+			minDuration: 100,
 			throwProps: true,
 			zIndexBoost: true,
 			onDrag: () => self.onUpdate.call(self),
-			// onDragEnd: self.onInteractionEnd,
-			onThrowUpdate: () => self.onUpdate.call(self)
-			// onThrowComplete: self.onComplete
-			// ease: Back.easeOut.config(0.2)
+			onThrowUpdate: () => self.onUpdate.call(self),
+			onThrowComplete: () => self.onComplete.call(self)
 		});
 	}
 
-	handleClick() {
-		if (!this.triggerState) {return}
-
-		let yPos = Math.floor(Math.random() * ( Math.floor(2000) - Math.ceil(-2000) ) ) + (-2000);
-		let endValue = Math.round(yPos / this.rotationStep) * this.rotationStep;
-
-		// this.setActiveTile(endValue);
+	handleClick(e, self) {
+		if (e.target.classList.contains('play')) {
+			TweenLite.ticker.addEventListener("tick", self.animateNull, self, true, 1);
+		} else {
+			TweenLite.ticker.removeEventListener("tick", self.animateNull);
+			this.pauseAudio()
+			// clearInterval(self.animateInterval);
+		}
 		
-		TweenLite.to(this.nullObject, 2, {
-			y: endValue,
-			onUpdate: this.onUpdate,
-			// onComplete: this.onComplete,
-			ease: Back.easeOut.config(0.2)
+		// TweenLite.to(this.nullObject, 2, {
+		// 	y: endValue,
+		// 	onUpdate: this.onUpdate,
+		// 	// onComplete: this.onComplete,
+		// 	ease: Back.easeOut.config(0.2)
+		// });
+	}
+
+	animateNull() {
+		let self = this;
+		// console.log(this.nullObject._gsTransform.x);
+		// let endValue = this.nullObject._gsTransform.x+1200;
+		TweenLite.to(self.nullObject, 1, {
+			x: '+=5590',
+			onUpdate: self.onUpdate.call(self),
+			ease: Back.easeIn
+			// onComplete: this.onComplete.call(self)
 		});
 	}
 
-	stopAudio() {
-
+	pauseAudio() {
+		this.player.file.pause();
 		this.isPlaying = false;
 	}
 
-	playAudio(velocity) {
+	playAudio(rate) {
+		let velocity = (rate > 1) ? 1 : rate;
+
 		if(!this.isPlaying) {
 			this.sound = this.player.file.play();
 			this.isPlaying = true;
 		}
 
-		player.file.rate(velocity, r);
+		this.player.file.rate(velocity, this.sound);
 	}
 
 	onUpdate() {
 		let destX = this.nullObject._gsTransform.x % this.fullRotation;
-		// let velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
 		let velocity = Math.round(ThrowPropsPlugin.getVelocity(this.nullObject, 'x')) / 1000;
-
-
-		// console.log( Math.abs(velocity) );
-
-		this.playAudio( Math.abs(velocity) );
-
-		// let step = Math.abs(Math.round(destX) % 30);
-		// let maxValue = (velocity > 2800) ? 25: 22;
-		// let minValue = (velocity > 2500) ? 6: 8;
-
-
-		
-		
-		// if(Slot.newStep && step > minValue && step < maxValue) {
-		// 	EVT.emit('tileScrolled');
-		// 	Slot.newStep = false;
-		// } else if (step < minValue || step > maxValue) {
-		// 	Slot.newStep = true;
-		// }
+		// console.log(Math.abs(velocity));
+		console.log(velocity);
+		this.playAudio( Math.abs(velocity) * 4);
 
 		TweenLite.set(this.el, {
 			rotationY: destX
 		});
 	}
 
-	onComplete() {
-		this.stopAudio();
-		// EVT.emit('slotComplete', Slot.activeTile);
-		// setTimeout(function() {
-		// 	EVT.emit('highlightTile', this.activeTile);
-		// }, 400);
+	onComplete() { 
+		this.pauseAudio()
 	}
 
 	disable() {

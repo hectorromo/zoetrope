@@ -2850,7 +2850,8 @@ var $$ = function $$(selector) {return document.querySelectorAll(selector);};var
 Sound =
 function Sound() {_classCallCheck(this, Sound);
 	this.file = new Howl({
-		src: ['./sounds/r.mp3'],
+		src: ['./sounds/s.mp3'],
+		// src: ['./sounds/r.mp3'],
 		loop: true });
 
 };var
@@ -2865,7 +2866,7 @@ Zoetrope = function () {
 		this.slotDraggable = null;
 		this.triggerState = true;
 		this.tilesNum = 18;
-		this.tileMargin = 0;
+		this.tileMargin = 75;
 	}_createClass(Zoetrope, [{ key: 'init', value: function init()
 
 		{
@@ -2880,7 +2881,7 @@ Zoetrope = function () {
 			this.setupNullObj();
 			this.createTiles();
 			this.setDraggable();
-			// this.listen();
+			this.listen();
 		} }, { key: 'setupAudio', value: function setupAudio()
 
 		{
@@ -2908,15 +2909,22 @@ Zoetrope = function () {
 				position: 'absolute',
 				x: 0 });
 
-		}
+		} }, { key: 'listen', value: function listen()
 
-		// listen() {
-		// console.log('zoetrope:listening');
-		// $('#slot-trigger').addEventListener('click', this.handleClick);
-		// EVT.on('modalClose', Slot.enable);
-		// EVT.on('slotComplete', Slot.disable);
-		// }
-	}, { key: 'createTiles', value: function createTiles()
+		{
+			console.log('listening');
+			var self = this;
+			$$('.controls button').forEach(function () {
+				addEventListener('click', function (e) {
+					self.handleClick(e, self);
+				});
+			});
+			//       console.log('zoetrope:listening');
+			// $('#slot-trigger').addEventListener('click', this.handleClick);
+			// EVT.on('modalClose', Slot.enable);
+			// EVT.on('slotComplete', Slot.disable);
+		} }, { key: 'createTiles', value: function createTiles()
+
 		{
 			var self = this;
 			for (var i = 0; i < this.tilesNum; i++) {
@@ -2924,7 +2932,6 @@ Zoetrope = function () {
 				var fileNumber = i < 10 ? '0' + i : i;
 				var itemBack = document.createElement('div');
 
-				console.log(fileNumber);
 				itemBack.className = "item-back";
 				itemBack.style.backgroundImage = 'url(./images/file00' + fileNumber + '.jpg)';
 				// '<div class="item-back"></div>';
@@ -2959,72 +2966,68 @@ Zoetrope = function () {
 				type: 'x',
 				lockAxis: true,
 				trigger: this.container,
-				dragResistance: 0.5,
-				throwResistance: 1200,
-				minDuration: 4,
+				dragResistance: 0.1,
+				throwResistance: 10,
+				minDuration: 100,
 				throwProps: true,
 				zIndexBoost: true,
 				onDrag: function onDrag() {return self.onUpdate.call(self);},
-				// onDragEnd: self.onInteractionEnd,
-				onThrowUpdate: function onThrowUpdate() {return self.onUpdate.call(self);}
-				// onThrowComplete: self.onComplete
-				// ease: Back.easeOut.config(0.2)
+				onThrowUpdate: function onThrowUpdate() {return self.onUpdate.call(self);},
+				onThrowComplete: function onThrowComplete() {return self.onComplete.call(self);} });
+
+		} }, { key: 'handleClick', value: function handleClick(
+
+		e, self) {
+			if (e.target.classList.contains('play')) {
+				TweenLite.ticker.addEventListener("tick", self.animateNull, self, true, 1);
+			} else {
+				TweenLite.ticker.removeEventListener("tick", self.animateNull);
+				this.pauseAudio();
+				// clearInterval(self.animateInterval);
+			}
+
+			// TweenLite.to(this.nullObject, 2, {
+			// 	y: endValue,
+			// 	onUpdate: this.onUpdate,
+			// 	// onComplete: this.onComplete,
+			// 	ease: Back.easeOut.config(0.2)
+			// });
+		} }, { key: 'animateNull', value: function animateNull()
+
+		{
+			var self = this;
+			// console.log(this.nullObject._gsTransform.x);
+			// let endValue = this.nullObject._gsTransform.x+1200;
+			TweenLite.to(self.nullObject, 1, {
+				x: '+=5590',
+				onUpdate: self.onUpdate.call(self),
+				ease: Back.easeIn
+				// onComplete: this.onComplete.call(self)
 			});
-		} }, { key: 'handleClick', value: function handleClick()
+		} }, { key: 'pauseAudio', value: function pauseAudio()
 
 		{
-			if (!this.triggerState) {return;}
-
-			var yPos = Math.floor(Math.random() * (Math.floor(2000) - Math.ceil(-2000))) + -2000;
-			var endValue = Math.round(yPos / this.rotationStep) * this.rotationStep;
-
-			// this.setActiveTile(endValue);
-
-			TweenLite.to(this.nullObject, 2, {
-				y: endValue,
-				onUpdate: this.onUpdate,
-				// onComplete: this.onComplete,
-				ease: Back.easeOut.config(0.2) });
-
-		} }, { key: 'stopAudio', value: function stopAudio()
-
-		{
-
+			this.player.file.pause();
 			this.isPlaying = false;
 		} }, { key: 'playAudio', value: function playAudio(
 
-		velocity) {
+		rate) {
+			var velocity = rate > 1 ? 1 : rate;
+
 			if (!this.isPlaying) {
 				this.sound = this.player.file.play();
 				this.isPlaying = true;
 			}
 
-			player.file.rate(velocity, r);
+			this.player.file.rate(velocity, this.sound);
 		} }, { key: 'onUpdate', value: function onUpdate()
 
 		{
 			var destX = this.nullObject._gsTransform.x % this.fullRotation;
-			// let velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
 			var velocity = Math.round(ThrowPropsPlugin.getVelocity(this.nullObject, 'x')) / 1000;
-
-
-			// console.log( Math.abs(velocity) );
-
-			this.playAudio(Math.abs(velocity));
-
-			// let step = Math.abs(Math.round(destX) % 30);
-			// let maxValue = (velocity > 2800) ? 25: 22;
-			// let minValue = (velocity > 2500) ? 6: 8;
-
-
-
-
-			// if(Slot.newStep && step > minValue && step < maxValue) {
-			// 	EVT.emit('tileScrolled');
-			// 	Slot.newStep = false;
-			// } else if (step < minValue || step > maxValue) {
-			// 	Slot.newStep = true;
-			// }
+			// console.log(Math.abs(velocity));
+			console.log(velocity);
+			this.playAudio(Math.abs(velocity) * 4);
 
 			TweenLite.set(this.el, {
 				rotationY: destX });
@@ -3032,11 +3035,7 @@ Zoetrope = function () {
 		} }, { key: 'onComplete', value: function onComplete()
 
 		{
-			this.stopAudio();
-			// EVT.emit('slotComplete', Slot.activeTile);
-			// setTimeout(function() {
-			// 	EVT.emit('highlightTile', this.activeTile);
-			// }, 400);
+			this.pauseAudio();
 		} }, { key: 'disable', value: function disable()
 
 		{
