@@ -6,6 +6,7 @@ import browserSync from 'browser-sync'
 
 gulp.task('js', () => {
     gulp.src([
+			'./node_modules/howler/dist/howler.js',
     		'./js/zoetrope.js',
     		'./js/main.js'
     	])
