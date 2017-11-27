@@ -1,34 +1,43 @@
 'use strict';var _createClass = function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};}();function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}var $ = function $(selector) {return document.querySelector(selector);};
 var $$ = function $$(selector) {return document.querySelectorAll(selector);};var
 
+
 Zoetrope = function () {
 	function Zoetrope(container) {_classCallCheck(this, Zoetrope);
 		this.container = $(container);
-		this.tileHeight = 180;
+		this.tileWidth = 150;
 		this.fullRotation = 360;
-		this.rotationStep = this.fullRotation / this.tilesNum;
-		// this.zDepth = Helpers.getZDepth(this.tileHeight, this.tilesNum),
-		// this.tileZOrigin = Helpers.getZOrigin(this.rotationStep),
-		// this.dynamicPerspective = Helpers.getPerspective(this.rotationStep, this.fullRotation),
-
 		this.tileArray = [];
 		this.slotDraggable = null;
 		this.triggerState = true;
+		this.tilesNum = 18;
+		this.tileMargin = 0;
 	}_createClass(Zoetrope, [{ key: 'init', value: function init()
 
 		{
-			console.log('zoetrope:init');
+			this.rotationStep = this.fullRotation / this.tilesNum;
+
+			this.zDepth = this.getZDepth(this.tileWidth + this.tileMargin, this.tilesNum);
+			// this.tileZOrigin = this.getZOrigin(this.rotationStep);
+			// console.log(this.tileZOrigin);
+			// this.dynamicPerspective = this.getPerspective();
 			this.setupHTML();
 			this.setupNullObj();
 			this.createTiles();
 			this.setDraggable();
-
 			// this.listen();
 		} }, { key: 'setupHTML', value: function setupHTML()
 
 		{
-			this.el = document.createElement('div');
+			TweenLite.set(this.container, {
+				transform: 'rotateX(-12deg)',
+				transformStyle: 'preserve-3d',
+				height: '100vh' });
+
+
+			this.el = document.createElement('ul');
 			this.el.className = 'zoetrope';
+			this.container.appendChild(this.el);
 		} }, { key: 'setupNullObj', value: function setupNullObj()
 
 		{
@@ -50,58 +59,58 @@ Zoetrope = function () {
 		// }
 	}, { key: 'createTiles', value: function createTiles()
 		{
-			for (var i = 0; i < 10; i++) {
+			var self = this;
+			for (var i = 0; i < this.tilesNum; i++) {
 				var tile = document.createElement('li');
+				var fileNumber = i < 10 ? '0' + i : i;
+				var itemBack = document.createElement('div');
+
+				console.log(fileNumber);
+				itemBack.className = "item-back";
+				itemBack.style.backgroundImage = 'url(./images/file00' + fileNumber + '.jpg)';
+				// '<div class="item-back"></div>';
 
 				tile.className = 'item';
-				tile.innerHTML = '<div class="item-background" style="background-color:green;"></div>\n\t\t\t\t\t\t\t\t<div class="item-content">\n\t\t\t\t\t\t\t\t\t<div class="item-image">\n\t\t\t\t\t\t\t\t\t\t<img src="" alt="">\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>';
+				tile.innerHTML = '<div class="item-front">' + i + '</div>';
 
+				tile.appendChild(itemBack);
 
-
-
-
-
-				tile.initRotationX = 0;
-				tile.initRotationY = i * this.rotationStep;
+				tile.initRotationY = 0;
+				tile.initRotationX = i * self.rotationStep;
 
 				TweenLite.set(tile, {
 					position: 'absolute',
-					width: '100%',
-					height: this.tileHeight + 'px',
+					// height: '100%',
+					width: self.tileWidth + 'px',
 					overflow: 'hidden',
-					zIndex: -i,
-					backfaceVisibility: 'hidden',
-					backgroundColor: 'green',
-					transform: 'rotateX(' + -(i * this.rotationStep) + 'deg) translateZ(' + this.zDepth + 'px)' });
+					// zIndex: -i,
+					// backfaceVisibility: 'hidden',
+					// backgroundColor: 'green',
+					transform: 'rotateY(' + i * self.rotationStep + 'deg) translateZ(' + self.zDepth + 'px)' });
 
 
-				this.tileArray.push(tile);
-				this.el.appendChild(tile);
+				self.tileArray.push(tile);
+				self.el.appendChild(tile);
 			}
 		} }, { key: 'setDraggable', value: function setDraggable()
 
 		{
+			var self = this;
 			this.slotDraggable = Draggable.create(this.nullObject, {
-				type: 'y',
+				type: 'x',
 				lockAxis: true,
 				trigger: this.container,
-				dragResistance: 0.6,
-				throwResistance: 100,
-				minDuration: 3,
+				dragResistance: 0.5,
+				throwResistance: 1200,
+				minDuration: 4,
 				throwProps: true,
-				onDrag: this.onUpdate,
-				zIndexBoost: false,
-				onDragEnd: this.onInteractionEnd,
-				onThrowUpdate: this.onUpdate,
-				onThrowComplete: this.onComplete,
-				ease: Back.easeOut.config(0.2),
-				snap: {
-					y: function y(endValue) {
-						this.setActiveTile(endValue);
-						return Math.round(endValue / this.rotationStep) * this.rotationStep;
-					} } });
-
-
+				zIndexBoost: true,
+				onDrag: function onDrag() {return self.onUpdate.call(self);},
+				// onDragEnd: self.onInteractionEnd,
+				onThrowUpdate: function onThrowUpdate() {return self.onUpdate.call(self);}
+				// onThrowComplete: self.onComplete
+				// ease: Back.easeOut.config(0.2)
+			});
 		} }, { key: 'handleClick', value: function handleClick()
 
 		{
@@ -115,17 +124,17 @@ Zoetrope = function () {
 			TweenLite.to(this.nullObject, 2, {
 				y: endValue,
 				onUpdate: this.onUpdate,
-				onComplete: this.onComplete,
+				// onComplete: this.onComplete,
 				ease: Back.easeOut.config(0.2) });
 
 		} }, { key: 'onUpdate', value: function onUpdate()
 
 		{
-			var destY = this.nullObject._gsTransform.y % this.fullRotation;
+			var destX = this.nullObject._gsTransform.x % this.fullRotation;
 			var velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
-			var step = Math.abs(Math.round(destY) % 30);
-			var maxValue = velocity > 2800 ? 25 : 22;
-			var minValue = velocity > 2500 ? 6 : 8;
+			// let step = Math.abs(Math.round(destX) % 30);
+			// let maxValue = (velocity > 2800) ? 25: 22;
+			// let minValue = (velocity > 2500) ? 6: 8;
 
 			// console.log(ThrowPropsPlugin.getVelocity(Slot.nullObject, 'y'))
 
@@ -137,18 +146,17 @@ Zoetrope = function () {
 			// }
 
 			TweenLite.set(this.el, {
-				rotationX: -destY,
-				force3D: true });
+				rotationY: destX });
 
-		} }, { key: 'onComlete', value: function onComlete()
+		}
 
-		{
-			// EVT.emit('slotComplete', Slot.activeTile);
-			setTimeout(function () {
-				EVT.emit('highlightTile', this.activeTile);
-			}, 400);
-		} }, { key: 'disable', value: function disable()
-
+		// onComplete() {
+		// EVT.emit('slotComplete', Slot.activeTile);
+		// setTimeout(function() {
+		// 	EVT.emit('highlightTile', this.activeTile);
+		// }, 400);
+		// }
+	}, { key: 'disable', value: function disable()
 		{
 			this.triggerState = false;
 			this.slotDraggable[0].disable();
@@ -157,6 +165,22 @@ Zoetrope = function () {
 		{
 			this.triggerState = true;
 			this.slotDraggable[0].enable();
+		} }, { key: 'getZDepth', value: function getZDepth(
+
+		tileWidth, tilesNum) {
+			return tileWidth / (2 * Math.tan(Math.PI / tilesNum));
+		} }, { key: 'getZOrigin', value: function getZOrigin()
+
+		{
+			return Math.round(window.innerWidth / 2 / Math.tan(this.DegreesToRadians(this.rotationStep / 2)));
+		} }, { key: 'DegreesToRadians', value: function DegreesToRadians(
+
+		valDeg) {
+			return 2 * Math.PI / this.fullRotation * valDeg;
+		} }, { key: 'getPerspective', value: function getPerspective()
+
+		{
+			return this.rotationStep / this.fullRotation * 2500;
 		} }]);return Zoetrope;}();
 'use strict';var zoetrope = new Zoetrope('.container');
 
