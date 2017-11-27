@@ -2847,6 +2847,14 @@
 'use strict';var _createClass = function () {function defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}return function (Constructor, protoProps, staticProps) {if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;};}();function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}var $ = function $(selector) {return document.querySelector(selector);};
 var $$ = function $$(selector) {return document.querySelectorAll(selector);};var
 
+Sound =
+function Sound() {_classCallCheck(this, Sound);
+	this.file = new Howl({
+		src: ['./sounds/r.mp3'],
+		loop: true });
+
+};var
+
 
 Zoetrope = function () {
 	function Zoetrope(container) {_classCallCheck(this, Zoetrope);
@@ -2867,11 +2875,16 @@ Zoetrope = function () {
 			// this.tileZOrigin = this.getZOrigin(this.rotationStep);
 			// console.log(this.tileZOrigin);
 			// this.dynamicPerspective = this.getPerspective();
+			this.setupAudio();
 			this.setupHTML();
 			this.setupNullObj();
 			this.createTiles();
 			this.setDraggable();
 			// this.listen();
+		} }, { key: 'setupAudio', value: function setupAudio()
+
+		{
+			this.player = new Sound();
 		} }, { key: 'setupHTML', value: function setupHTML()
 
 		{
@@ -2973,16 +2986,38 @@ Zoetrope = function () {
 				// onComplete: this.onComplete,
 				ease: Back.easeOut.config(0.2) });
 
+		} }, { key: 'stopAudio', value: function stopAudio()
+
+		{
+
+			this.isPlaying = false;
+		} }, { key: 'playAudio', value: function playAudio(
+
+		velocity) {
+			if (!this.isPlaying) {
+				this.sound = this.player.file.play();
+				this.isPlaying = true;
+			}
+
+			player.file.rate(velocity, r);
 		} }, { key: 'onUpdate', value: function onUpdate()
 
 		{
 			var destX = this.nullObject._gsTransform.x % this.fullRotation;
-			var velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
+			// let velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
+			var velocity = Math.round(ThrowPropsPlugin.getVelocity(this.nullObject, 'x')) / 1000;
+
+
+			// console.log( Math.abs(velocity) );
+
+			this.playAudio(Math.abs(velocity));
+
 			// let step = Math.abs(Math.round(destX) % 30);
 			// let maxValue = (velocity > 2800) ? 25: 22;
 			// let minValue = (velocity > 2500) ? 6: 8;
 
-			// console.log(ThrowPropsPlugin.getVelocity(Slot.nullObject, 'y'))
+
+
 
 			// if(Slot.newStep && step > minValue && step < maxValue) {
 			// 	EVT.emit('tileScrolled');
@@ -2994,15 +3029,16 @@ Zoetrope = function () {
 			TweenLite.set(this.el, {
 				rotationY: destX });
 
-		}
+		} }, { key: 'onComplete', value: function onComplete()
 
-		// onComplete() {
-		// EVT.emit('slotComplete', Slot.activeTile);
-		// setTimeout(function() {
-		// 	EVT.emit('highlightTile', this.activeTile);
-		// }, 400);
-		// }
-	}, { key: 'disable', value: function disable()
+		{
+			this.stopAudio();
+			// EVT.emit('slotComplete', Slot.activeTile);
+			// setTimeout(function() {
+			// 	EVT.emit('highlightTile', this.activeTile);
+			// }, 400);
+		} }, { key: 'disable', value: function disable()
+
 		{
 			this.triggerState = false;
 			this.slotDraggable[0].disable();
@@ -3029,5 +3065,4 @@ Zoetrope = function () {
 			return this.rotationStep / this.fullRotation * 2500;
 		} }]);return Zoetrope;}();
 'use strict';var zoetrope = new Zoetrope('.container');
-
 zoetrope.init();

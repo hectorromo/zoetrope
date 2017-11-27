@@ -1,6 +1,14 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
+class Sound {
+	constructor() {
+		this.file = new Howl({
+	      src: ['./sounds/r.mp3'],
+	      loop: true
+	    });
+	}
+}
 
 class Zoetrope {
 	constructor(container) {
@@ -21,11 +29,16 @@ class Zoetrope {
 		// this.tileZOrigin = this.getZOrigin(this.rotationStep);
 		// console.log(this.tileZOrigin);
 		// this.dynamicPerspective = this.getPerspective();
+		this.setupAudio();
 		this.setupHTML();
 		this.setupNullObj();
 		this.createTiles();
 		this.setDraggable();
 		// this.listen();
+	}
+
+	setupAudio() {
+		this.player = new Sound();
 	}
 
 	setupHTML() {
@@ -129,14 +142,36 @@ class Zoetrope {
 		});
 	}
 
+	stopAudio() {
+
+		this.isPlaying = false;
+	}
+
+	playAudio(velocity) {
+		if(!this.isPlaying) {
+			this.sound = this.player.file.play();
+			this.isPlaying = true;
+		}
+
+		player.file.rate(velocity, r);
+	}
+
 	onUpdate() {
 		let destX = this.nullObject._gsTransform.x % this.fullRotation;
-		let velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
+		// let velocity = ThrowPropsPlugin.getVelocity(this.nullObject, 'y');
+		let velocity = Math.round(ThrowPropsPlugin.getVelocity(this.nullObject, 'x')) / 1000;
+
+
+		// console.log( Math.abs(velocity) );
+
+		this.playAudio( Math.abs(velocity) );
+
 		// let step = Math.abs(Math.round(destX) % 30);
 		// let maxValue = (velocity > 2800) ? 25: 22;
 		// let minValue = (velocity > 2500) ? 6: 8;
 
-		// console.log(ThrowPropsPlugin.getVelocity(Slot.nullObject, 'y'))
+
+		
 		
 		// if(Slot.newStep && step > minValue && step < maxValue) {
 		// 	EVT.emit('tileScrolled');
@@ -150,12 +185,13 @@ class Zoetrope {
 		});
 	}
 
-	// onComplete() {
+	onComplete() {
+		this.stopAudio();
 		// EVT.emit('slotComplete', Slot.activeTile);
 		// setTimeout(function() {
 		// 	EVT.emit('highlightTile', this.activeTile);
 		// }, 400);
-	// }
+	}
 
 	disable() {
 		this.triggerState = false;
