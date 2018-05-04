@@ -2866,7 +2866,7 @@ Zoetrope = function () {
 		this.slotDraggable = null;
 		this.triggerState = true;
 		this.tilesNum = 18;
-		this.tileMargin = 75;
+		this.tileMargin = 150;
 	}_createClass(Zoetrope, [{ key: 'init', value: function init()
 
 		{
@@ -2933,11 +2933,11 @@ Zoetrope = function () {
 				var itemBack = document.createElement('div');
 
 				itemBack.className = "item-back";
-				itemBack.style.backgroundImage = 'url(./images/file00' + fileNumber + '.jpg)';
+				itemBack.style.backgroundImage = 'url(./images/pico/file00' + fileNumber + '.jpg)';
 				// '<div class="item-back"></div>';
 
 				tile.className = 'item';
-				tile.innerHTML = '<div class="item-front">' + i + '</div>';
+				tile.innerHTML = '<div class="item-front"></div>';
 
 				tile.appendChild(itemBack);
 
@@ -2948,7 +2948,7 @@ Zoetrope = function () {
 					position: 'absolute',
 					// height: '100%',
 					width: self.tileWidth + 'px',
-					overflow: 'hidden',
+					// overflow: 'hidden',
 					// zIndex: -i,
 					// backfaceVisibility: 'hidden',
 					// backgroundColor: 'green',
@@ -2999,6 +2999,7 @@ Zoetrope = function () {
 			// console.log(this.nullObject._gsTransform.x);
 			// let endValue = this.nullObject._gsTransform.x+1200;
 			TweenLite.to(self.nullObject, 1, {
+				// x: '+=8400',
 				x: '+=5590',
 				onUpdate: self.onUpdate.call(self),
 				ease: Back.easeIn
@@ -3063,5 +3064,7 @@ Zoetrope = function () {
 		{
 			return this.rotationStep / this.fullRotation * 2500;
 		} }]);return Zoetrope;}();
-'use strict';var zoetrope = new Zoetrope('.container');
+'use strict';
+// container, tilesNum, tileWidth, tileMargin
+var zoetrope = new Zoetrope('.container');
 zoetrope.init();
